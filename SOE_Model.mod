@@ -13,9 +13,9 @@
 %% Defining Variables
 %----------------------------------------------------------------
 
-var pi $\pi$ mu $\mu$ mc $mc$ w $w$ s $s$ ps $p^*$ p $p$ a $a$ x $x$ g $g$ 
-y $y$ pi_m $\overline\pi$ l $l$ z $z$ phi $\phi$ i $i$ c $c$ nu $\nu$ 
-pis $\pi^*$ is $i^*$
+var pi $\hat\pi$ mu $\hat\mu$ mc $\widehat{mc}$ w $\hat w$ s $\hat s$ ps $\hat p^*$ p $\hat p$ a $a$ x $\hat x$ g $\hat g$ 
+y $\hat y$ pi_m $\overline\pi$ l $\hat l$ z $\hat z$ phi $\hat \phi$ i $\hat i$ c $\hat c$ nu $\nu$ 
+pis $\pi^*$ is $\hat i^*$
 ;
 
 varexo err_mu $\varepsilon^\mu$ err_g $\varepsilon^g$ err_a $\varepsilon^a$
@@ -89,9 +89,10 @@ sigma_nu  = 0.0025;
 
 % Functional Parameters
 beta        = exp(-rho);
-i_          = rho  ;
-is_         = rho  ;
+i_          = 0  ;
+is_         = 0  ;
 mu_         = log(theta/(theta-1)); % Steady State Markup
+
 vartheta_l  = delta*(log((1-delta)/delta));
 vartheta_z  = log(delta/(1-delta)) + vartheta_l;
 varrho_pi   = 1/(1+beta*gamma);
@@ -105,13 +106,13 @@ kappa_m       = (lambda/(1-lambda))*(1-(1-lambda)*beta);
 model(linear);
     
     [name = 'Phillips Curve',type='endogenous']
-    pi = varrho_pi * (gamma*pi(-1) + beta*pi(1) + kappa_m*(mu + mc)) ;
+    pi = varrho_pi * (gamma*pi(-1) + beta*pi(1) + kappa_m*((mu-mu_) + mc)) ;
     
     [name = '(Real) Marginal Cost',type='endogenous']
     mc = (1-delta)*w + delta*(s + ps) - p - a ;
     
     [name = 'Euler Equation',type='endogenous']
-    x = x(1) - sigma^(-1)*(i - pi(1) - rho + rho_g*(g-g_)) ;
+    x = x(1) - sigma^(-1)*((i-i_) - pi(1) + rho_g*(g-g_)) ;
     
     [name = 'Habit',type='endogenous']
     x = (1/(1-h))*(c - h*c(-1)) ;
@@ -120,7 +121,7 @@ model(linear);
     y = c;
     
     [name = 'Monetary Policy Rule',type='endogenous']
-    i - i_ = rho_i*(i(-1) - i_)
+    (i - i_) = rho_i*(i(-1) - i_)
         + (1-rho_i)*(phi_pi*(p(2)-p(-1)-pi_m) + phi_c*c + phi_dc*(c-c(-4)) 
         + phi_2*(s - s(-2))) + nu ;
         
@@ -134,7 +135,7 @@ model(linear);
     z = y - a + (1-delta)*(w - (s + ps)) ;
     
     [name = 'UIP',type='endogenous']
-    i - is = s(1) - s + phi - chi*(s + ps - p) ;
+    (i - i_) - (is - is_) = s(1) - s + phi - chi*(s + ps - p) ;
      
 % Exogenous Processes
     
@@ -197,6 +198,5 @@ write_latex_dynamic_model;
 write_latex_original_model;
 resid;
 model_diagnostics;
+steady;
 %check;
-
-
