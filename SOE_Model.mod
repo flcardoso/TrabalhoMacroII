@@ -38,7 +38,7 @@ rho_is $\rho_{i^*}$ sigma_is $\sigma_{i^*}$ is_ $\overline i^*$
 rho_nu $\rho_\nu$   sigma_nu $\sigma_\nu$   
 
 vartheta_l $\vartheta_l$ vartheta_z $\vartheta_z$
-varrho_pi $\varrho_\pi$ kappa $\kappa$
+varrho_pi $\varrho_\pi$ kappa_m $\kappa_m$
 ;
 
 %----------------------------------------------------------------
@@ -95,7 +95,7 @@ mu_         = log(theta/(theta-1)); % Steady State Markup
 vartheta_l  = delta*(log((1-delta)/delta));
 vartheta_z  = log(delta/(1-delta)) + vartheta_l;
 varrho_pi   = 1/(1+beta*gamma);
-kappa       = (1/(1-lambda))*(1-(1-lambda)*beta);
+kappa_m       = (lambda/(1-lambda))*(1-(1-lambda)*beta);
 
 
 %----------------------------------------------------------------
@@ -105,16 +105,16 @@ kappa       = (1/(1-lambda))*(1-(1-lambda)*beta);
 model(linear);
     
     [name = 'Phillips Curve',type='endogenous']
-    pi = varrho_pi * (gamma*pi(-1) + beta*pi(1) + kappa*(mu+mc)) ;
+    pi = varrho_pi * (gamma*pi(-1) + beta*pi(1) + kappa_m*(mu + mc)) ;
     
     [name = '(Real) Marginal Cost',type='endogenous']
-    mc = (1-delta)*w + delta*(s + ps) - p - a + vartheta_l - log(1-delta) ;
+    mc = (1-delta)*w + delta*(s + ps) - p - a ;
     
     [name = 'Euler Equation',type='endogenous']
     x = x(1) - sigma^(-1)*(i - pi(1) - rho + rho_g*(g-g_)) ;
     
     [name = 'Habit',type='endogenous']
-    x = (1/(1-h))*(c - h*c(-1)) + log(1-h) ;
+    x = (1/(1-h))*(c - h*c(-1)) ;
     
     [name = 'Mkt Clearing',type='endogenous']
     y = c;
@@ -122,16 +122,16 @@ model(linear);
     [name = 'Monetary Policy Rule',type='endogenous']
     i - i_ = rho_i*(i(-1) - i_)
         + (1-rho_i)*(phi_pi*(p(2)-p(-1)-pi_m) + phi_c*c + phi_dc*(c-c(-4)) 
-        + phi_2*(s - s(-2)) + nu) ;
+        + phi_2*(s - s(-2))) + nu ;
         
     [name = 'Labor',type='endogenous']
-    l = y - a + delta*(s + ps - w) + vartheta_l ;
+    l = y - a + delta*(s + ps - w) ;
     
     [name = 'Wages',type='endogenous']
     w = p + varphi*l + sigma*x;
     
     [name = 'Imports',type='endogenous']
-    z = y - a + (1-delta)*(w - (s + ps)) + vartheta_z ;
+    z = y - a + (1-delta)*(w - (s + ps)) ;
     
     [name = 'UIP',type='endogenous']
     i - is = s(1) - s + phi - chi*(s + ps - p) ;
@@ -179,13 +179,13 @@ end;
 %----------------------------------------------------------------
 
 shocks;
-var err_mu = sigma_mu^2;
-var err_g = sigma_g^2;
-var err_a = sigma_a^2;
-var err_nu = sigma_nu^2;
+var err_mu  = sigma_mu^2;
+var err_g   = sigma_g^2;
+var err_a   = sigma_a^2;
+var err_nu  = sigma_nu^2;
 var err_phi = sigma_phi^2;
-var err_pi = sigma_pi^2;
-var err_is = sigma_is^2;
+var err_pi  = sigma_pi^2;
+var err_is  = sigma_is^2;
 end;
 
 
