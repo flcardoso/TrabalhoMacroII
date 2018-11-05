@@ -13,8 +13,10 @@
 %% Defining Variables
 %----------------------------------------------------------------
 
-var pi $\hat\pi$ mu $\hat\mu$ mc $\widehat{mc}$ w $\hat w$ s $\hat s$ ps $\hat p^*$ p $\hat p$ a $a$ x $\hat x$ g $\hat g$ 
-y $\hat y$ pi_m $\overline\pi$ l $\hat l$ z $\hat z$ phi $\hat \phi$ i $\hat i$ c $\hat c$ nu $\nu$ 
+var pi $\hat\pi$ mu $\hat\mu$ mc $\widehat{mc}$ w $\hat w$ s $\hat s$ 
+ps $\hat p^*$ p $\hat p$ a $a$ x $\hat x$ g $\hat g$ 
+y $\hat y$ pi_m $\overline\pi$ l $\hat l$ z $\hat z$ phi $\hat \phi$ 
+i $\hat i$ c $\hat c$ nu $\nu$ 
 pis $\pi^*$ is $\hat i^*$
 ;
 
@@ -46,51 +48,51 @@ varrho_pi $\varrho_\pi$ kappa_m $\kappa_m$
 %----------------------------------------------------------------
 
 rho     = 0.02/4;
-h       = 0;        % Habit Persistence 0<=h<1
+h       = .25;      % Habit Persistence 0<=h<1
 sigma   = 1;        % Inverse Intertemp Subs/Risk Aversion
 varphi  = 5;        % Inverse Frisch
-delta   = .5;       % Imports
+delta   = 1/3;      % Imports
 lambda  = 1/4;      % Calvo
-gamma   = 0;        % Inflation Inertia
-rho_i   = 0;        % Interest Rate Inertia (MPR)
+gamma   = 0.25;     % Inflation Inertia
+rho_i   = .25;        % Interest Rate Inertia (MPR)
 phi_pi  = 1.5;      % Inflation (MPR)
 phi_c   = 0;        % Consumption (MPR)
-phi_dc  = 0;        % Delta Consumption (MPR)
+phi_dc  = .25;        % Delta Consumption (MPR)
 phi_2   = .2;       % Exchange Rate (MPR)
 chi     = .001;     % Exchange Rate Imbalance Coeff (UIP)
 theta   = 9 ;       % S-S Elasticity of Subst.
 
-rho_g = 0; 
+rho_g = .8; 
 sigma_g = 0.0025;
 g_ = 0;
 
-rho_a  = 0;
+rho_a  = .8;
 sigma_a = 0.01;
 a_ = 0;
 
-rho_pi  = 0;
+rho_pi  = .8;
 sigma_pi  = 0.2;
 
-rho_phi   = 0;
+rho_phi   = .8;
 sigma_phi  = 0.01;
 phi_ = 0;
 
-rho_mu   = 0;
+rho_mu   = .8;
 sigma_mu  = 0.2;
 
-rho_is   = 0;
+rho_is   = .8;
 sigma_is  = 0.0025;
 
 
-rho_nu   = 0;
+rho_nu   = .3;
 sigma_nu  = 0.0025;
 
 
 
 % Functional Parameters
 beta        = exp(-rho);
-i_          = 0  ;
-is_         = 0  ;
+i_          = rho  ;
+is_         = rho  ;
 mu_         = log(theta/(theta-1)); % Steady State Markup
 
 vartheta_l  = delta*(log((1-delta)/delta));
@@ -174,6 +176,33 @@ model(linear);
     
 end;
 
+%----------------------------------------------------------------
+%% Initializing Values
+%----------------------------------------------------------------
+
+initval;
+
+pi  = 0;
+mu  = mu_;
+mc  = 0 ;
+w   = 0 ;
+s   = 0 ;
+ps  = 0 ;
+p   = 0 ;
+a   = 0 ;
+x   = 0 ;
+g   = 0 ;
+y   = 0 ;
+l   = 0 ;
+z   = 0 ;
+phi = 0 ;
+i   = rho ;
+c   = 0 ;
+nu  = 0 ;
+pis = 0 ;
+is  = rho ;
+
+end;
 
 %----------------------------------------------------------------
 %% Shocks
@@ -199,4 +228,5 @@ write_latex_original_model;
 resid;
 model_diagnostics;
 steady;
-%check;
+check;
+stoch_simul(order=1,periods=1000,irf=25,tex);
