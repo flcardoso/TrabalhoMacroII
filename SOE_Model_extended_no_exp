@@ -1,0 +1,433 @@
+% Trabalho Macroeconomia II - Small Open Economy - Carlos Viana Carvalho
+% SOE_Model - Extended Estimation - No Exports
+% Fernando Cardoso
+% PUC-Rio - 2H 2018
+
+%----------------------------------------------------------------
+%% Housekeeping
+%----------------------------------------------------------------
+
+
+
+%----------------------------------------------------------------
+%% Defining Variables
+%----------------------------------------------------------------
+
+var pi $\hat\pi$ mu $\hat\mu$ mc $\widehat{mc}$ w $\hat w$ s $\hat s$ 
+ps $\hat p^*$ p $\hat p$ a $a$ x $\hat x$ g $\hat g$ 
+y $\hat y$ l $\hat l$ z $\hat z$ phi $\hat \phi$ 
+i $\hat i$ c $\hat c$ nu $\nu$ 
+pis $\pi^*$ is $\hat i^*$
+
+eta $\eta$ 
+upsilon $\upsilon$ 
+pi_g $\pi^G$
+
+i_m $\hat i^m$ 
+i_b $\hat i^b$
+
+% Observed
+ipca_resid $IPCA$ 
+lconsumo_resid $Consumo$ 
+lusdbrl_resid $BRL$ 
+cpi_us_resid $CPI$ 
+t2y_resid $TSY$
+
+tjlp_resid $TJLP$
+selic_resid $Selic$
+
+ipca_adm_resid $IPCA^{Adm}$ 
+% ipca_livres_resid $IPCA^{Liv}$ 
+
+;
+
+varexo err_mu $\varepsilon^\mu$ err_g $\varepsilon^g$ err_a $\varepsilon^a$
+err_nu $\varepsilon^\nu$ err_phi $\varepsilon^\phi$ err_pi $\varepsilon^\pi$ 
+err_is $\varepsilon^{i^*}$ 
+
+err_eta $\varepsilon^\eta$ 
+err_b $\varepsilon^b$ 
+
+;
+
+parameters 
+beta $\beta$ h sigma $\sigma$ varphi $\varphi$ rho $\rho$ i_ $\overline i$
+delta $\delta$ lambda $\lambda$ gamma $\gamma$ theta $\theta$ 
+rho_i $\rho_i$ phi_pi $\phi_\pi$ phi_c $\phi_c$ phi_dc $\phi_{\Delta c}$
+phi_2 $\phi_2$ chi $\chi$
+
+%Adm
+lambda_g $\lambda^G$ gamma_g $\gamma^G$
+Theta_g $\Theta^G$ varrho_g $\varrho_\pi^G$ varrho_e $\varrho_\pi^e$
+kappa_g $\kappa^G$
+
+%Exports
+
+
+% Shadow rate
+iota $\overline \iota$
+
+rho_g $\rho_g$      sigma_g $\sigma_g$      g_ $\overline g$
+rho_a $\rho_a$      sigma_a $\sigma_a$      a_ $\overline a$
+rho_pi $\rho_\pi$   sigma_pi $\sigma_\pi$ 
+rho_phi $\rho_\phi$ sigma_phi $\sigma_\phi$ phi_ $\overline \phi$
+rho_mu $\rho_\mu$   sigma_mu $\sigma_\mu$   mu_ $\overline\mu$
+rho_is $\rho_{i^*}$ sigma_is $\sigma_{i^*}$ is_ $\overline i^*$
+rho_nu $\rho_\nu$   sigma_nu $\sigma_\nu$   
+
+rho_eta $\rho_eta$  sigma_eta $\sigma_\eta$
+
+rho_b $\rho_b$ sigma_b $\sigma_b$
+
+rho_x $\rho_x$ sigma_x $\sigma_x$
+
+vartheta_l $\vartheta_l$ vartheta_z $\vartheta_z$
+varrho_pi $\varrho_\pi$ kappa_m $\kappa_m$
+
+% Signal errors
+
+;
+
+%----------------------------------------------------------------
+%% Calibration
+%----------------------------------------------------------------
+
+rho     = 0.0087;
+h       = .75;      % Habit Persistence 0<=h<1
+sigma   = 1;      % Inverse Intertemp Subs/Risk Aversion
+varphi  = 1;        % Inverse Frisch
+delta   = .2;      % Imports
+lambda  = 1/4;      % Calvo
+gamma   = 1/3;      % Inflation Inertia
+rho_i   = .2;       % Interest Rate Inertia (MPR)
+
+phi_pi  = 2;        % Inflation (MPR)
+phi_c   = .5;       % Consumption (MPR)
+phi_dc  = .5;      % Delta Consumption (MPR)
+phi_2   = .1;       % Exchange Rate (MPR)
+
+chi     = .001;     % Exchange Rate Imbalance Coeff (UIP)
+theta   = 10 ;      % S-S Elasticity of Subst.
+
+gamma_g = 1/3;      %Inflation Inertia - Adm. Prices
+lambda_g= 0 ;      % Adm prices share
+% xi_x    = 0 ;     % Exports share
+iota    = .5;        % ~Earmarked credit share
+% zeta_x  = .5;      % Exports price param.
+
+rho_g = .8; 
+sigma_g = 0.0025;
+g_ = 0;
+
+rho_a  = .8;
+sigma_a = 0.01;
+a_ = 0;
+
+rho_pi  = .8;
+sigma_pi  = 0.005;
+
+rho_phi   = .8;
+sigma_phi  = 0.01;
+phi_ = 0;
+
+rho_mu   = .8;
+sigma_mu  = 0.025;
+
+rho_is   = .8;
+sigma_is  = 0.0025;
+
+rho_nu   = .8;
+sigma_nu  = 0.0025;
+
+rho_eta = .8;
+sigma_eta = 0.01;
+
+rho_b   = .8;
+sigma_b = .0025;
+
+rho_x   = .8;
+sigma_x = .1;
+
+% Functional Parameters
+beta        = exp(-rho);
+i_          = rho  ;
+is_         = rho  ;
+mu_         = log(theta/(theta-1)); % Steady State Markup
+
+Theta_g     = 1/( (1-lambda)*(1+beta*gamma)
+                + lambda_g*(lambda-(1-lambda)*beta*(1-(gamma_g-gamma))));
+varrho_g    = Theta_g* (1-(1-lambda)*beta) ;
+varrho_pi   = Theta_g* (1-lambda_g)*(1-lambda)*gamma ;
+varrho_e    = Theta_g* (1-lambda)*beta;
+kappa_g     = Theta_g* lambda*(1-lambda_g)*(1-(1-lambda)*beta) ;
+
+%----------------------------------------------------------------
+%% Model
+%----------------------------------------------------------------
+
+model(linear);
+    
+    [name = 'Phillips Curve',type='endogenous']
+    pi = varrho_g*pi_g + varrho_pi*pi(-1) + varrho_e*pi(1) 
+                                       + kappa_g*((mu-mu_)+mc) + upsilon;
+    
+    [name = '(Real) Marginal Cost',type='endogenous']
+    mc = (1-delta)*w + delta*(s + ps) - p - a ;
+    
+    [name = 'Euler Equation',type='endogenous']
+    x = x(1) - sigma^(-1)*((i-i_) - pi(1) + rho_g*(g-g_)) ;
+    
+    [name = 'Habit',type='endogenous']
+    x = (1/(1-h))*(c - h*c(-1)) ;
+    
+    [name = 'Mkt Clearing',type='endogenous']
+    y = c;
+    
+    [name = 'Monetary Policy Rule',type='endogenous']
+    (i_m - i_) = rho_i*(i_m(-1) - i_)
+        + (1-rho_i)*(phi_pi*(p(2)-p(-1)) + phi_c*c + phi_dc*(c-c(-4)) 
+        + phi_2*(s - s(-2))) + nu ;
+        
+    [name = 'Shadow rate',type='exogenous']
+    i = iota*i_b + (1-iota)*i_m;
+    
+    [name = 'Labor - Total',type='endogenous']
+    l = y - a + delta*(s + ps - w) ;
+    
+    [name = 'Wages',type='endogenous']
+    w = p + varphi*l + sigma*x ;
+    
+    [name = 'Imports - Total',type='endogenous']
+    z = y - a + (1-delta)*(w - (s + ps)) ;
+    
+    [name = 'UIP',type='endogenous']
+    (i_m - i_) - (is - is_) = s(1) - s + phi - chi*(s + ps - p) ;
+    
+% Exogenous Processes
+    
+    [name='mu',type='exogenous']
+    mu-mu_ =  rho_mu*(mu(-1)-mu_) + sigma_mu*err_mu ;
+    
+    [name='g',type='exogenous']
+    g-g_ = rho_g*(g(-1)-g_) + sigma_g*err_g ;
+    
+    [name='a',type='exogenous']
+    a-a_ = rho_a*(a(-1)-a_) + sigma_a*err_a ;
+    
+    [name='nu',type='exogenous']
+    nu = rho_nu*nu(-1) + sigma_nu*err_nu ;
+    
+    [name='phi',type='exogenous']
+    phi-phi_ = rho_phi*(phi(-1)-phi_) + sigma_phi*err_phi ;
+    
+    [name='pis',type='exogenous']
+    pis = rho_pi*pis(-1) + sigma_pi*err_pi ;
+    
+    [name='is',type='exogenous']
+    is-is_ = rho_is*(is(-1)-is_) + sigma_is*err_is ;
+    
+    [name='eta',type='exogenous']
+    eta = rho_eta*eta(-1) + sigma_eta*err_eta;
+    
+    [name='upsilon',type='endogenous']
+    upsilon = -Theta_g*lambda_g*(1-lambda)*beta*rho_eta*eta;
+    
+    [name='i_b',type='exogenous']
+    (i_b-i_) = rho_b * (i_b(-1)-i_) + sigma_b*err_b;
+    
+% Definitions
+
+    [name = 'Inflation',type='endogenous']
+    pi = p - p(-1) ;
+    
+    [name = 'Foreign Inflation',type='exogenous']
+    pis = ps - ps(-1) ;
+    
+    [name= '\pi^G',type='exogenous']
+    pi_g = pi_g(-1) - (1 - gamma_g)*pi(-1)+ eta;
+    
+    
+% Measurment Equations
+
+    [name = 'Measurement - Inflation']
+    pi  = ipca_resid ;      % Domestic inflation in deviation from target,
+                            % demeaned
+                            
+    [name = 'Measurement - Consumption']
+    c   = lconsumo_resid ;  % Personal consumption (Consumo das famílias),
+                            % detrended log-consumption
+                            
+    [name = 'Measurement - Interest Rate']
+    i_m   = selic_resid ;     % Selic Target rate, detrended (HP) Qtly (/4)
+    
+    [name = 'Measurement - Exchange Rate']
+    s   = lusdbrl_resid ;   % Nominal exchange rate,
+                            % detrend log-exchange rate
+    
+    [name = 'Measurement - CPI']
+    pis = cpi_us_resid ;    % US CPI/PCE,
+                            % deviation from target, demeaned
+   
+    [name = 'Measurement - i^*']                        
+    is  = t2y_resid ;       % 2-Year Treasury Constant Maturity Rate,
+                            % detrended (HP) Qtly (/4)
+
+    [name = 'Measurement - TJLP']
+    i_b = tjlp_resid;
+    
+    [name = 'Measurement - Adm']
+    ipca_adm_resid = gamma_g*pi(-1) + eta;
+    
+end;
+
+%----------------------------------------------------------------
+%% Initializing Values
+%----------------------------------------------------------------
+
+initval;
+
+pi  = 0;
+mu  = mu_;
+mc  = 0 ;
+w   = 0 ;
+s   = 0 ;
+ps  = 0 ;
+p   = 0 ;
+a   = 0 ;
+x   = 0 ;
+g   = 0 ;
+y   = 0 ;
+l   = 0 ;
+z   = 0 ;
+phi = 0 ;
+i   = rho ;
+c   = 0 ;
+nu  = 0 ;
+pis = 0 ;
+is  = rho ;
+ipca_resid = 0;
+lconsumo_resid = 0;
+lusdbrl_resid = 0;
+cpi_us_resid = 0;
+t2y_resid = rho;
+
+eta = 0;
+pi_g= 0;
+
+ipca_adm_resid = 0;
+% ipca_livres_resid = 0;
+
+tjlp_resid = rho;
+selic_resid = rho;
+i_m = rho;
+i_b = rho;
+
+end;
+
+%----------------------------------------------------------------
+%% Shocks
+%----------------------------------------------------------------
+
+shocks;
+var err_mu  = 1;
+var err_g   = 1;
+var err_a   = 1;
+var err_nu  = 1;
+var err_phi = 1;
+var err_pi  = 1;
+var err_is  = 1;
+var err_eta = 1;
+var err_b   = 1;
+
+end;
+
+%----------------------------------------------------------------
+%% Estimated Parameters
+%----------------------------------------------------------------
+
+estimated_params;
+
+rho     , GAMMA_PDF,   .0087   , .005;
+sigma   , GAMMA_PDF,     1      ,  .5  ;
+varphi  , GAMMA_PDF,     1      ,  .5  ;
+h       , BETA_PDF ,    .75      , .1  ;
+delta   , BETA_PDF,     .2      ,  .1 ;
+lambda  , BETA_PDF,     .25     , .1  ;
+% theta   , GAMMA_PDF,    10    , 1   ;
+gamma   , BETA_PDF,     1/3      , .1  ;
+
+rho_i   , GAMMA_PDF,     .5    , .1  ;
+phi_pi  , GAMMA_PDF,    1.5     , .5  ;
+phi_c   , GAMMA_PDF,     .5     , .25  ;
+phi_dc  , GAMMA_PDF,     .5     , .2  ;
+phi_2   , GAMMA_PDF,     .5      , .2  ;
+% chi     , BETA_PDF,     .001  , .0001  ;
+
+lambda_g, BETA_PDF,     .5   , .1  ;
+iota    , BETA_PDF,    0.1   , .05  ;
+gamma_g , BETA_PDF,     1/3   , .1  ;
+
+rho_g   , GAMMA_PDF ,    .8, .1  ;
+rho_a   , GAMMA_PDF ,    .9, .05  ;
+rho_pi  , GAMMA_PDF ,    .8, .1  ;
+rho_phi , GAMMA_PDF ,    .8, .1  ;
+rho_mu  , GAMMA_PDF ,    .8, .1  ;
+rho_is  , GAMMA_PDF ,    .8, .1  ;
+rho_nu  , GAMMA_PDF ,    .8, .1  ;
+rho_eta , GAMMA_PDF ,    .8, .1  ;
+rho_b   , GAMMA_PDF ,    .8, .1  ;
+
+sigma_g     ,INV_GAMMA_PDF,1,inf;
+sigma_a     ,INV_GAMMA_PDF,1,inf;
+sigma_pi    ,INV_GAMMA_PDF,1,inf;
+sigma_phi   ,INV_GAMMA_PDF,1,inf;
+sigma_mu    ,INV_GAMMA_PDF,1,inf;
+sigma_is    ,INV_GAMMA_PDF,1,inf;
+sigma_nu    ,INV_GAMMA_PDF,1,inf;
+sigma_eta   ,INV_GAMMA_PDF,1,inf;
+sigma_b     ,INV_GAMMA_PDF,1,inf;
+ 
+end;
+
+%----------------------------------------------------------------
+%% Observables
+%----------------------------------------------------------------
+
+varobs
+ipca_resid
+lconsumo_resid 
+selic_resid 
+lusdbrl_resid 
+cpi_us_resid 
+t2y_resid
+ipca_adm_resid 
+% ipca_livres_resid 
+tjlp_resid
+;
+
+%----------------------------------------------------------------
+%% Run
+%----------------------------------------------------------------
+% resid;
+% check;
+% steady;
+
+estimation(
+	nodiagnostic,
+    plot_priors=0,
+	optim=('Algorithm','active-set'),
+	datafile = 'SOE_Model_extended_data.xlsx',
+	mode_compute=6,
+	first_obs=4,
+	presample=10,
+	lik_init=2,
+	prefilter=0,
+	mh_replic=2000,
+	mh_nblocks=2,
+	mh_jscale=0.06,
+	mh_drop=0.2,
+    bayesian_irf,
+    irf = 40,
+    consider_all_endogenous,
+    tex
+);
